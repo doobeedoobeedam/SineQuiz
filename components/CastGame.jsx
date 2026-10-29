@@ -1,6 +1,6 @@
 'use client';
 // Ensemble Cast
-// game over kalau waktu habis, salah tebak, atau menekan Menyerah.
+// game over kalau waktu habis, salah tebak, atau klik Menyerah
 import { useEffect, useRef, useState } from 'react';
 import Result, { btn, ghost } from './Result';
 import { clean, near } from '../lib/text';
@@ -98,9 +98,15 @@ export default function CastGame({ t, lang, country, badges, onExit }) {
 
   if (phase === 'end') {
     const why = { timeout: t.timeout, wrong: t.reasonWrong, giveup: t.reasonGiveUp }[reason];
+    const half = cast.length / 2;
+    const jab = reason === 'win'
+      ? { text: t.castPerfect, ok: true }
+      : found.length >= half
+        ? { text: t.castPraise, ok: true }
+        : { text: t.jabCast, ok: false };
     return (
       <Result
-        t={t} lang={lang} badges={badges} minimal
+        t={t} lang={lang} badges={badges} minimal rapor
         title={t.modes.cast.name}
         hero={{ photo: film.poster, name: `${film.title} (${film.year})` }}
         score={found.length * 100}
@@ -108,7 +114,7 @@ export default function CastGame({ t, lang, country, badges, onExit }) {
         log={cast.map((_, k) => found.includes(k))}
         summary={t.castResult(found.length, cast.length)}
         note={reason === 'win' ? { text: t.allCast, ok: true } : { text: `${t.gameOver} · ${why}`, ok: false }}
-        jab={reason !== 'win' && found.length < cast.length / 2 ? { text: t.jabCast, ok: false } : null}
+        jab={jab}
         onAgain={load} onMenu={onExit}
       />
     );

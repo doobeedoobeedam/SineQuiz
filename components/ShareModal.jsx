@@ -5,25 +5,35 @@ import { accent, ghost } from '../lib/ui';
 export default function ShareModal({ t, build, shareText, onClose }) {
   const [src, setSrc] = useState(null);
   const [file, setFile] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     let url;
-    build().then((canvas) =>
-      canvas.toBlob((blob) => {
+    let alive = true;
+    Promise.resolve()
+      .then(() => build())
+      .then((canvas) => new Promise((resolve, reject) =>
+        canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('toBlob gagal'))), 'image/png')
+      ))
+      .then((blob) => {
+        if (!alive) return;
         url = URL.createObjectURL(blob);
         setSrc(url);
         setFile(new File([blob], 'sinequiz.png', { type: 'image/png' }));
-      }, 'image/png')
-    );
+      })
+      .catch((e) => {
+        console.error('Gagal membuat kartu:', e);
+        if (alive) setError(e?.message || String(e));
+      });
     const onKey = (e) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
     return () => {
+      alive = false;
       if (url) URL.revokeObjectURL(url);
       window.removeEventListener('keydown', onKey);
     };
   }, []);
 
-  // di HP, tombol "Bagikan" buka menu share bawaan (IG, WA, dll)
   const canShare = file && navigator.canShare?.({ files: [file] });
   const share = () => navigator.share({ files: [file], title: 'SineQuiz', text: shareText }).catch(() => {});
 
@@ -32,6 +42,8 @@ export default function ShareModal({ t, build, shareText, onClose }) {
       <div className="flex max-h-full flex-col items-center gap-4" onClick={(e) => e.stopPropagation()}>
         {src ? (
           <img src={src} alt="SineQuiz" className="max-h-[72dvh] w-auto rounded-xl shadow-2xl ring-1 ring-white/15" />
+        ) : error ? (
+          <p className="max-w-xs rounded-xl bg-bad/15 px-4 py-3 text-center text-sm text-bad">{error}</p>
         ) : (
           <p className="grid h-64 w-52 place-items-center text-cream/70">{t.making}</p>
         )}

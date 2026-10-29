@@ -1,4 +1,4 @@
-// Ensemble Cast
+// mode Ensemble Cast
 import { IMG, getPool, shuffle, tmdb, tmdbLang } from '../../../lib/tmdb';
 
 export const dynamic = 'force-dynamic';
@@ -8,7 +8,7 @@ export async function GET(req) {
   const q = new URL(req.url).searchParams;
   const lang = q.get('lang') === 'en' ? 'en' : 'id';
   try {
-    const pool = await getPool(q.get('country') || 'ALL', lang);
+    const pool = await getPool(q.get('country') || 'ALL', lang, true); // tanpa animasi
     const films = await Promise.all(
       shuffle(pool).slice(0, 9).map(async (m) => {
         try {

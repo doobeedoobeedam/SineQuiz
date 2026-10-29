@@ -14,14 +14,14 @@ export { btn, ghost };
 // hero = { photo, name } foto/logo kecil di kolom kanan
 // minimal = true -> hanya skor
 // report = [{ label, value }] kotak report card
-export default function Result({ t, lang, title, score, correct, total, log, extra, summary, note, jab, hero, minimal, report, badges = [], onAgain, onMenu }) {
+export default function Result({ t, lang, title, score, correct, total, log, extra, summary, note, jab, hero, minimal, rapor, report, badges = [], onAgain, onMenu }) {
   const [open, setOpen] = useState(false);
   const ratio = total ? correct / total : 0;
   const pct = Math.round(ratio * 100);
   const grade = t.grades[ratio >= 0.9 ? 3 : ratio >= 0.7 ? 2 : ratio >= 0.4 ? 1 : 0];
   const line = summary || t.correctOf(correct, total);
 
-  const card = { t, lang, title, score, correct, total, log, grade: minimal ? null : grade, pct, summary: line, extra, note, jab, hero, minimal, report, badges };
+  const card = { t, lang, title, score, correct, total, log, grade: minimal ? null : grade, pct, summary: line, extra, note, jab, hero, minimal, rapor, report, badges };
 
   return (
     <section className="flex min-h-0 flex-1 flex-col justify-center gap-5 py-4 sm:gap-6">
@@ -33,7 +33,7 @@ export default function Result({ t, lang, title, score, correct, total, log, ext
           <h2 className="font-serif text-4xl italic leading-none sm:text-7xl lg:text-8xl">{score} {t.pts}</h2>
           {!minimal && <p className="text-base font-semibold sm:text-2xl">{grade}</p>}
           <p className="text-sm text-cream/75 sm:text-base">{line}{extra ? `. ${extra}` : ''}</p>
-          {!minimal && !report && <p className="text-sm font-semibold text-pink sm:text-lg">{t.reportScore(pct, letterGrade(pct))}</p>}
+          {(!minimal || rapor) && !report && <p className="text-sm font-semibold text-pink sm:text-lg">{t.reportScore(pct, letterGrade(pct))}</p>}
           {!minimal && (
             <div className="flex max-w-md gap-1 sm:gap-1.5">
               {log.map((ok, k) => <span key={k} className={`h-2 flex-1 rounded-sm sm:h-3 ${ok ? 'bg-ok' : 'bg-bad'}`} />)}

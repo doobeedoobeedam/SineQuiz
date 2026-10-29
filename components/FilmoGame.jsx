@@ -97,8 +97,8 @@ export default function FilmoGame({ t, lang, onActor, onExit }) {
       setFound([...found, fresh]);
       return setMsg({ ok: true, text: `${t.hit} ${film.title} (${film.year})` });
     }
-    if (hits.length) return setMsg({ ok: false, text: t.already }); // sudah disebut = tidak dihukum
-    setMsg({ ok: false, text: t.missFilm }); // salah = tidak game over, lanjut menebak
+    if (hits.length) return setMsg({ ok: false, text: t.already }); // sudah disebut tidak dihukum
+    setMsg({ ok: false, text: t.missFilm }); // salah: tidak game over, lanjut menebak
   };
 
   if (phase === 'loading') return <p className="m-auto text-lg text-cream/70">{t.loading}</p>;
@@ -121,7 +121,7 @@ export default function FilmoGame({ t, lang, onActor, onExit }) {
     const why = { timeout: t.timeout, wrong: t.reasonWrong, giveup: t.reasonGiveUp }[reason];
     return (
       <Result
-        t={t} lang={lang} minimal
+        t={t} lang={lang} minimal rapor
         title={t.modes.filmo.name}
         hero={{ photo: actor.photo, name: actor.name }}
         score={found.length * 100}

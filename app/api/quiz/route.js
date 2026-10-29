@@ -20,16 +20,21 @@ async function scene(country, lang) {
   return rounds.filter(Boolean).slice(0, 10);
 }
 
-function posterRounds(movies, tag) {
+// mode 2 & 3 (poster pixel, pilihan ganda) -> SEMUA film dalam set masuk, tanpa terkecuali
+function posterRounds(movies, tag, popularFirst = false) {
   const today = new Date().toISOString().slice(0, 10);
   const seen = new Set();
   const list = movies.filter(
     (m) => m.poster_path && m.title && m.release_date && m.release_date <= today && !seen.has(m.id) && seen.add(m.id)
   );
-  return shuffle(list).map((m) => makeRound(m, list, { kind: 'poster', tag, image: IMG + 'w342' + m.poster_path }));
+  // popularFirst: film paling populer (vote terbanyak) muncul lebih dulu, sisanya diacak
+  const ordered = popularFirst
+    ? [...list].sort((a, b) => b.vote_count - a.vote_count)
+    : shuffle(list);
+  return ordered.map((m) => makeRound(m, list, { kind: 'poster', tag, image: IMG + 'w342' + m.poster_path }));
 }
 
-// film MCU -> cari keyword "marvel cinematic universe" di TMDB, lalu ambil SEMUA halamannya
+// film MCU: cari keyword "marvel cinematic universe" di TMDB, lalu ambil SEMUA halamannya
 async function mcu(country, lang) {
   const lq = tmdbLang(lang);
   let movies = [];
@@ -46,14 +51,14 @@ async function mcu(country, lang) {
     }
   } catch {}
 
-  // cadangan kalau keyword tidak ketemu -> film Marvel Studios (company id 420)
+  // cadangan kalau keyword tidak ketemu: film Marvel Studios (company id 420)
   if (movies.length < 20) {
     const pages = await Promise.all(
       [1, 2, 3].map((p) => tmdb(`/discover/movie?with_companies=420&sort_by=vote_count.desc&vote_count.gte=500&language=${lq}&page=${p}`))
     );
     movies = pages.flatMap((r) => r.results);
   }
-  return posterRounds(movies, 'mcu');
+  return posterRounds(movies, 'mcu', true);
 }
 
 // semua film yang disutradarai Christopher Nolan (person id 525)
@@ -64,7 +69,7 @@ async function nolan(country, lang) {
 
 // dua aktor utama dari satu film, tebak filmnya
 async function link(country, lang) {
-  const pool = await getPool(country, lang);
+  const pool = await getPool(country, lang, true); // tanpa animasi
   const rounds = await Promise.all(
     shuffle(pool).slice(0, 16).map(async (m) => {
       try {
@@ -83,7 +88,7 @@ async function link(country, lang) {
 
 const MODES = { scene, mcu, nolan, link };
 
-// foto/logo khusus untuk layar hasil poster -> logo Marvel Studios atau Christopher Nolan
+// foto/logo khusus untuk layar hasil poster: logo Marvel Studios atau foto Christopher Nolan
 async function heroFor(mode) {
   if (mode === 'mcu') {
     const c = await tmdb('/company/420');

@@ -2,11 +2,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Media from './Media';
 import Result, { btn, ghost } from './Result';
-import { letterGrade } from '../lib/badges';
+import { SETS } from '../lib/badges';
 
 const TOTAL = 20; // detik per soal
 
-export default function QuizGame({ t, lang, mode, country, badges = [], stats, onGuess, onRun, onExit }) {
+export default function QuizGame({ t, lang, mode, country, onWin, onExit }) {
   const [phase, setPhase] = useState('loading'); // loading | error | play | reveal | end
   const [rounds, setRounds] = useState([]);
   const [heroImg, setHeroImg] = useState(null); // foto/logo Marvel atau Nolan untuk layar hasil
@@ -60,10 +60,9 @@ export default function QuizGame({ t, lang, mode, country, badges = [], stats, o
 
   // sesi selesai (habis atau Enough) = simpan nilai rapor sekali aja
   useEffect(() => {
-    if (phase !== 'end' || reported.current || !isPoster || !onRun) return;
+    if (phase !== 'end' || stopped || !isPoster || reported.current) return;
     reported.current = true;
-    const ok = log.filter(Boolean).length;
-    onRun(mode, log.length ? Math.round((100 * ok) / log.length) : 0, { correct: ok, total: log.length });
+    if (rounds.length && log.filter(Boolean).length === rounds.length) onWin?.(mode);
   }, [phase]);
 
   // dipanggil saat user memilih jawaban (atau null kalau waktu habis)
@@ -78,9 +77,8 @@ export default function QuizGame({ t, lang, mode, country, badges = [], stats, o
     setStreak(newStreak);
     setBest((b) => Math.max(b, newStreak));
     setLog((l) => [...l, ok]);
-    if (ok && round.tag && onGuess) onGuess({ key: round.tag, filmId: round.id, total: rounds.length });
     setPhase('reveal');
-  }, [phase, round, streak, onGuess, rounds.length]);
+  }, [phase, round, streak]);
 
   const next = useCallback(() => {
     if (i + 1 >= rounds.length) return setPhase('end');
@@ -151,9 +149,9 @@ export default function QuizGame({ t, lang, mode, country, badges = [], stats, o
       return (
         <Result t={t} lang={lang} title={modeName} score={score} log={log} total={rounds.length} correct={ok}
           summary={t.correctFilms(ok, rounds.length)} extra={`${t.bestStreak}: ${best}`}
-          jab={{ text: t.posterPraise[tier], ok: tier >= 2 }}
+          jab={{ text: t.posterPraiseStudio[mode][tier], ok: tier >= 2 }}
           hero={heroImg ? { photo: heroImg, name: studioName, bg: heroBg } : undefined}
-          badges={badges.filter((b) => b.key === mode)}
+          badges={ok === rounds.length && rounds.length ? SETS.filter((b) => b.key === mode) : []}
           onAgain={load} onMenu={onExit} />
       );
     }
