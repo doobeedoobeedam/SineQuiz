@@ -107,7 +107,7 @@ export default function App() {
         <QuizGame t={t} lang={lang} mode={config.mode} country={config.country} badges={earned} stats={stats} onGuess={handleGuess} onRun={handleRun} onExit={toMenu} />
       )}
 
-      <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 pt-3 text-xs text-cream/40">
+      <footer className="flex flex-col sm:flex-row flex-wrap items-center justify-between gap-x-4 gap-y-1 pt-3 text-xs text-cream/40">
         <span>{t.footer}</span>
         <span>
           &copy; 2026{' '}

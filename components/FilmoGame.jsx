@@ -1,14 +1,14 @@
 'use client';
 // Tebak Film Aktor
 // game over kalau waktu habis, salah tebak, atau menekan Menyerah.
-// semua film tertebak sebelum waktu habis = badge Fans Garis Keras
+// semua film tertebak sebelum waktu habis = badge "Fans Garis Keras [aktor]"
 import { useEffect, useRef, useState } from 'react';
 import Result, { btn, ghost } from './Result';
 import { clean, near, stripArticle } from '../lib/text';
 import { actorBadge } from '../lib/badges';
 
 // index film yang cocok dengan tebakan, urut dari yang paling pas
-// 1. judul persis sama  2. beda satu huruf (salah ketik)  3. awal judul ("mission impossible")
+// 1) judul persis sama  2) beda satu huruf (salah ketik)  3) awal judul ("mission impossible")
 function matches(guess, films) {
   const q = stripArticle(clean(guess));
   if (q.length < 2) return [];
@@ -33,14 +33,18 @@ export default function FilmoGame({ t, lang, onActor, onExit }) {
   const deadline = useRef(0);
   const foundRef = useRef([]); // salinan 'found' untuk dibaca di dalam timer
   const ended = useRef(false);
+  const seen = useRef(new Set()); // id aktor yang sudah tampil di sesi browser ini
 
   const load = async () => {
     setPhase('loading');
     try {
-      const res = await fetch('/api/filmo', { cache: 'no-store' });
+      // kirim id aktor yang sudah tampil di sesi ini supaya tidak berulang
+      const ex = [...seen.current].slice(-80).join(',');
+      const res = await fetch(`/api/filmo?exclude=${ex}`, { cache: 'no-store' });
       const data = await res.json();
       if (!res.ok || !data.rounds?.length) throw new Error(data.error || 'Error');
       const a = data.rounds[0]; // hanya satu aktor
+      seen.current.add(String(a.id));
       const secs = a.films.length * 10 + 60; // 10 detik per film + 60 detik tambahan
       setActor(a); setLimit(secs); setLeft(secs);
       setFound([]); foundRef.current = []; setInput(''); setMsg(null); setReason(null);
@@ -57,7 +61,7 @@ export default function FilmoGame({ t, lang, onActor, onExit }) {
   useEffect(() => { if (started.current) return; started.current = true; load(); }, []);
   useEffect(() => { foundRef.current = found; }, [found]);
 
-  // akhiri sesi (sekali aja), simpan hasil & badge
+  // akhiri sesi (sekali saja), simpan hasil & badge
   const endGame = (why) => {
     if (ended.current) return;
     ended.current = true;
@@ -94,7 +98,7 @@ export default function FilmoGame({ t, lang, onActor, onExit }) {
       return setMsg({ ok: true, text: `${t.hit} ${film.title} (${film.year})` });
     }
     if (hits.length) return setMsg({ ok: false, text: t.already }); // sudah disebut = tidak dihukum
-    setMsg({ ok: false, text: t.missFilm }); // salah = tidak game over
+    setMsg({ ok: false, text: t.missFilm }); // salah = tidak game over, lanjut menebak
   };
 
   if (phase === 'loading') return <p className="m-auto text-lg text-cream/70">{t.loading}</p>;
@@ -125,7 +129,7 @@ export default function FilmoGame({ t, lang, onActor, onExit }) {
         log={actor.films.map((_, k) => found.includes(k))}
         summary={t.filmResult(found.length, total)}
         note={won ? { text: t.allFilms, ok: true } : { text: `${t.gameOver} · ${why}`, ok: false }}
-        jab={won ? null : found.length >= total / 2
+        jab={won ? { text: t.perfectFilmo, ok: true } : found.length >= total / 2
           ? { text: t.praiseFilmo, ok: true }
           : { text: t.jabFilmo(actor.name), ok: false }}
         badges={won ? [actorBadge(actor)] : []}

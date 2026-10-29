@@ -8,7 +8,7 @@ import { clean, near } from '../lib/text';
 const TOTAL = 90; // detik
 const SKIP = ['de', 'la', 'le', 'da', 'di', 'du', 'van', 'von', 'bin', 'al', 'jr', 'sr', 'ii', 'iii']; // kata sambung nama
 
-// Index semua cast yang cocok dengan tebakan. Satu kata sudah cukup ("chris" atau "evans")
+// index semua cast yang cocok dengan tebakan. satu kata sudah cukup ("chris" atau "evans")
 // salah ketik satu huruf pun dimaafkan
 function matches(guess, cast) {
   const q = clean(guess);

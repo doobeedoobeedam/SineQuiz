@@ -45,7 +45,7 @@ const FilmoArt = () => (
 
 function Section({ n, flip, art, label, title, desc, play, onPlay, children }) {
   return (
-    <article className="grid items-center gap-6 border-t border-white/10 py-16 lg:grid-cols-2 lg:py-24 lg:gap-14">
+    <article className="grid items-center gap-6 border-t border-white/10 py-16 lg:grid-cols-2 lg:py-20 lg:gap-14">
       <Frame className={flip ? 'rotate-1 lg:order-2' : '-rotate-1'}>{art}</Frame>
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
@@ -88,7 +88,7 @@ export default function Menu({ t, lang, onStart }) {
 
   return (
     <div className="flex-1">
-      <h1 className="py-4 font-serif text-5xl italic leading-none lg:text-7xl">{t.heading}</h1>
+      <h1 className="py-4 font-serif text-4xl italic leading-none lg:text-5xl">{t.heading}</h1>
 
       <Section n="1" art={<SceneArt />} title={t.modes.scene.name} desc={t.modes.scene.desc} play={t.play} onPlay={play('scene')}>
         {picker('scene')}
@@ -116,17 +116,18 @@ export default function Menu({ t, lang, onStart }) {
         </div>
       </Section>
 
-      <Section n="3" art={<LinkArt />} title={t.modes.link.name} desc={t.modes.link.desc} play={t.play} onPlay={play('link')}>
+      <Section n="3" art={<FilmoArt />} title={t.modes.filmo.name} desc={t.modes.filmo.desc} play={t.play} onPlay={() => onStart({ mode: 'filmo', country: 'ALL' })}>
+        <p className="text-sm text-pink">⭐ {t.fanBadgeHint}</p>
+      </Section>
+
+      <Section n="4" flip art={<LinkArt />} title={t.modes.link.name} desc={t.modes.link.desc} play={t.play} onPlay={play('link')}>
         {picker('link')}
       </Section>
 
-      <Section n="4" flip art={<CastArt />} title={t.modes.cast.name} desc={t.modes.cast.desc} play={t.play} onPlay={play('cast')}>
+      <Section n="5" art={<CastArt />} title={t.modes.cast.name} desc={t.modes.cast.desc} play={t.play} onPlay={play('cast')}>
         {picker('cast')}
       </Section>
 
-      <Section n="5" art={<FilmoArt />} title={t.modes.filmo.name} desc={t.modes.filmo.desc} play={t.play} onPlay={() => onStart({ mode: 'filmo', country: 'ALL' })}>
-        <p className="text-sm text-pink">⭐ {t.fanBadgeHint}</p>
-      </Section>
     </div>
   );
 }

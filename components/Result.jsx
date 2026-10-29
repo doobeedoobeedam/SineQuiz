@@ -7,13 +7,13 @@ import { btn, ghost, accent } from '../lib/ui';
 
 export { btn, ghost };
 
-//   summary = kalimat utama
-//   extra = keterangan kecil di bawah summary
-//   note = { text, ok } keterangan game over / menang
-//   jab = { text, ok } pujian (ok = true) atau sindiran (ok = false)
-//   hero = { photo, name } foto/logo kecil di kolom kanan
-//   minimal = true -> hanya skor
-//   report = [{ label, value }] kotak report card
+// summary = kalimat utama
+// extra = keterangan kecil di bawah summary
+// note = { text, ok } keterangan game over / menang
+// jab = { text, ok } pujian (ok = true) atau sindiran (ok = false)
+// hero = { photo, name } foto/logo kecil di kolom kanan
+// minimal = true -> hanya skor
+// report = [{ label, value }] kotak report card
 export default function Result({ t, lang, title, score, correct, total, log, extra, summary, note, jab, hero, minimal, report, badges = [], onAgain, onMenu }) {
   const [open, setOpen] = useState(false);
   const ratio = total ? correct / total : 0;
@@ -57,7 +57,7 @@ export default function Result({ t, lang, title, score, correct, total, log, ext
                 src={hero.photo}
                 alt={hero.name}
                 style={{ backgroundColor: hero.bg }}
-                className={`aspect-[2/3] w-full max-w-[6.5rem] rounded-md object-contain p-1.5 ring-1 ring-white/15 sm:max-w-[9.5rem] sm:p-2 ${hero.bg ? '' : 'bg-film'}`}
+                className={`aspect-[2/3] w-full max-w-[6.5rem] rounded-md object-contain p-1.5 ring-1 ring-white/15 sm:max-w-[12.5rem] sm:p-2`}
               />
               <p className="text-center font-serif text-sm italic leading-tight sm:text-xl">{hero.name}</p>
             </>
