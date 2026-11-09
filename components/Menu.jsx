@@ -12,6 +12,7 @@ const SceneArt = () => (
     <span className="font-serif text-[9rem] italic leading-none text-cream">?</span>
   </div>
 );
+
 const PixelArt = () => (
   <div className="absolute inset-0 grid" style={{ gridTemplateColumns: 'repeat(16, 1fr)', gridTemplateRows: 'repeat(9, 1fr)' }}>
     {Array.from({ length: 144 }, (_, i) => {
@@ -21,12 +22,14 @@ const PixelArt = () => (
     })}
   </div>
 );
+
 const LinkArt = () => (
   <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#ff9f5a]/30 to-film">
     <span className="h-28 w-28 rounded-full bg-pink/90" />
     <span className="-ml-10 h-28 w-28 rounded-full bg-volt/90 mix-blend-screen" />
   </div>
 );
+
 const CastArt = () => (
   <div className="absolute inset-0 flex items-center justify-center -space-x-4 bg-gradient-to-br from-ok/25 to-film">
     {['from-pink to-volt', 'from-volt to-ok', 'from-ok to-pink', 'from-pink to-[#ff9f5a]', 'from-[#ff9f5a] to-volt'].map((c) => (
@@ -43,14 +46,34 @@ const FilmoArt = () => (
   </div>
 );
 
+const ActorArt = () => (
+  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-volt/25 to-film">
+    {['-rotate-6 from-volt to-pink', '-translate-y-2 from-pink to-ok', 'rotate-6 from-ok to-volt'].map((c) => (
+      <span key={c} className={`-mx-3 h-32 w-24 rounded-lg bg-gradient-to-b ring-2 ring-ink ${c}`} />
+    ))}
+  </div>
+);
+
+const VowelArt = () => (
+  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-ok/20 to-film px-4">
+    <span className="text-center font-serif text-3xl italic leading-tight tracking-wide text-cream sm:text-4xl">
+      {'THE DARK KNIGHT'.replace(/[AEIOU]/g, '?')}
+    </span>
+  </div>
+);
+
 function Section({ n, flip, art, label, title, desc, play, onPlay, children }) {
   return (
     <article className="grid items-center gap-6 border-t border-white/10 py-16 lg:grid-cols-2 lg:py-20 lg:gap-14">
       <Frame className={flip ? 'rotate-1 lg:order-2' : '-rotate-1'}>{art}</Frame>
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <span className="font-serif text-5xl italic leading-none text-pink">{n}</span>
-          {label && <span className="rounded-full bg-pink px-3 py-1 text-xs font-semibold text-ink">{label}</span>}
+          <span className="font-serif text-4xl italic leading-none text-pink sm:text-5xl">{n}</span>
+          {label && (
+            <span className="inline-flex items-center rounded-full bg-pink px-3 py-1.5 text-xs font-semibold leading-none text-ink">
+              {label}
+            </span>
+          )}
         </div>
         <h2 className="font-serif text-4xl italic leading-[1.05] lg:text-5xl">{title}</h2>
         <p className="max-w-md text-cream/70">{desc}</p>
@@ -79,7 +102,8 @@ function CountrySelect({ t, lang, value, onChange }) {
 
 export default function Menu({ t, lang, onStart }) {
   const [country, setCountry] = useState({ scene: 'ALL', link: 'ALL', cast: 'ALL' }); // negara per section
-  const [sub, setSub] = useState('mcu'); // pilihan poster: 'mcu' | 'nolan'
+  const [sub, setSub] = useState('mcu'); // pilihan 'mcu' | 'nolan'
+  const [vowelLevel, setVowelLevel] = useState('easy');
 
   const picker = (key) => (
     <CountrySelect t={t} lang={lang} value={country[key]} onChange={(v) => setCountry({ ...country, [key]: v })} />
@@ -91,10 +115,12 @@ export default function Menu({ t, lang, onStart }) {
       <h1 className="py-4 font-serif text-4xl italic leading-none lg:text-5xl">{t.heading}</h1>
 
       <Section n="1" art={<SceneArt />} title={t.modes.scene.name} desc={t.modes.scene.desc} play={t.play} onPlay={play('scene')}>
+        <p className="text-sm text-pink">{t.modes.scene.hint}</p>
         {picker('scene')}
       </Section>
 
-      <Section n="2" flip art={<PixelArt />} label={t.special} title={t.modes.poster.name} desc={t.modes.poster.desc} play={t.play} onPlay={() => onStart({ mode: sub, country: 'ALL' })}>
+      <Section n="2" flip art={<PixelArt />} label={t.modes.poster.label} title={t.modes.poster.name} desc={t.modes.poster.desc} play={t.play} onPlay={() => onStart({ mode: sub, country: 'ALL' })}>
+        <p className="text-sm text-pink">{t.modes.poster.hint}</p>
         <div className="grid max-w-md gap-3 sm:grid-cols-2" role="radiogroup" aria-label={t.pickPoster}>
           {['mcu', 'nolan'].map((id) => {
             const badge = SETS.find((b) => b.key === id);
@@ -116,18 +142,42 @@ export default function Menu({ t, lang, onStart }) {
         </div>
       </Section>
 
-      <Section n="3" art={<FilmoArt />} title={t.modes.filmo.name} desc={t.modes.filmo.desc} play={t.play} onPlay={() => onStart({ mode: 'filmo', country: 'ALL' })}>
-        <p className="text-sm text-pink">⭐ {t.fanBadgeHint}</p>
+      <Section n="3" art={<VowelArt />} label={t.modes.vowel.label} title={t.modes.vowel.name} desc={t.modes.vowel.desc} play={t.play} onPlay={() => onStart({ mode: 'vowel', country: 'ALL', level: vowelLevel })}>
+        <p className="text-sm text-pink">{t.modes.vowel.hint}</p>
+        <div className="grid max-w-md gap-3 sm:grid-cols-2" role="radiogroup" aria-label={t.modes.vowel.name}>
+          {['easy', 'hard'].map((id) => (
+            <button
+              key={id}
+              role="radio"
+              aria-checked={vowelLevel === id}
+              onClick={() => setVowelLevel(id)}
+              className={`rounded-2xl border px-4 py-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-pink ${
+                vowelLevel === id ? 'border-cream bg-white/10' : 'border-white/20 hover:border-white/50'
+              }`}
+            >
+              <span className="block font-semibold">{t.modes.vowel.levels[id]}</span>
+              <span className="block text-sm text-cream/60">{t.modes.vowel.levelDesc[id]}</span>
+            </button>
+          ))}
+        </div>
       </Section>
 
-      <Section n="4" flip art={<LinkArt />} title={t.modes.link.name} desc={t.modes.link.desc} play={t.play} onPlay={play('link')}>
+      <Section n="4" flip art={<FilmoArt />} title={t.modes.filmo.name} desc={t.modes.filmo.desc} play={t.play} onPlay={() => onStart({ mode: 'filmo', country: 'ALL' })}>
+        <p className="text-sm text-pink">{t.modes.filmo.hint}</p>
+      </Section>
+
+      <Section n="5" art={<LinkArt />} title={t.modes.link.name} desc={t.modes.link.desc} play={t.play} onPlay={play('link')}>
+        <p className="text-sm text-pink">{t.modes.link.hint}</p>
         {picker('link')}
       </Section>
 
-      <Section n="5" art={<CastArt />} title={t.modes.cast.name} desc={t.modes.cast.desc} play={t.play} onPlay={play('cast')}>
+      <Section n="6" flip art={<CastArt />} title={t.modes.cast.name} desc={t.modes.cast.desc} play={t.play} onPlay={play('cast')}>
         {picker('cast')}
       </Section>
 
+      <Section n="7" art={<ActorArt />} title={t.modes.actorGuess.name} desc={t.modes.actorGuess.desc} play={t.play} onPlay={() => onStart({ mode: 'actorguess', country: 'ALL' })}>
+        <p className="text-sm text-pink">{t.modes.actorGuess.hint}</p>
+      </Section>
     </div>
   );
 }
