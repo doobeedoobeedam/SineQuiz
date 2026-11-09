@@ -1,5 +1,6 @@
 // Soal pilihan ganda
 import { IMG, getPool, makeRound, originalTitle, shuffle, tmdb, tmdbLang } from '../../../lib/tmdb';
+import { CURATED_ACTORS } from '../../../lib/actors';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,6 +8,7 @@ const MARVEL = '420|505'; // Marvel Studios | Marvel Entertainment
 const MARVEL_SHARE = 0.2;  // Guess the Scene -> proporsi film Marvel
 const SCENE_ROUNDS = 10;
 const LINK_ROUNDS = 10;
+const isAnimation = (m) => (m.genre_ids || []).includes(16);
 
 const isGroot = (t) => /groot/i.test(t);
 // buang Documentary (99) dan Animation (16), kecuali Groot
@@ -16,7 +18,7 @@ const excludedGenre = (m) => (m.genre_ids || []).some((g) => g === 16 || g === 9
 const BAD_IMAGES = new Set([]);
 
 // whitelist -> film backdrop resmi yang saia pilih sendiri
-// formatnya: id film TMDB -> file_path backdrop. misal: 550 (Fight Club): '/abc123.jpg'
+// formatnya -> id film TMDB -> file_path backdrop. misal: 550 (Fight Club): '/abc123.jpg'
 const CURATED = {};
 
 // backdrop yang dipakai -> tanpa teks/bahasa dan tidak ada di blask list.
@@ -52,24 +54,114 @@ async function scene(country, lang) {
   return shuffle(rounds.filter(Boolean)).slice(0, SCENE_ROUNDS);
 }
 
-// Connect the Actors -> 2 aktor dari satu film
+// Connect the Actors: tiga filter dijalankan bersamaan pada kandidat yang sama, hasilnya digabung.
+// F1 -> dua pemeran teratas film (urutan billing)
+// F2 -> dua aktor dari daftar FAMOUS_ACTORS
+// F3 -> sama kayak F2, dan film itu harus yang paling baru yang dibintangi kedua aktor
+// satu film cuma muncul sekali
+
+let famousCache = null;
+async function famousIds() {
+  if (famousCache) return famousCache;
+  const names = Array.isArray(CURATED_ACTORS) ? CURATED_ACTORS : [];
+  const found = await Promise.all(
+    names.map((name) =>
+      tmdb(`/search/person?query=${encodeURIComponent(name)}&language=en-US`)
+        .then((r) => (r.results || []).find((p) => p.known_for_department === 'Acting' && p.profile_path) || null)
+        .catch(() => null)
+    )
+  );
+  famousCache = new Set(found.filter(Boolean).map((p) => p.id));
+  return famousCache;
+}
+
 async function link(country, lang) {
   const tl = country === 'ID' ? 'id' : 'en';
-  const pool = await getPool(country, lang, { noAnimation: true });
-  const rounds = await Promise.all(
-    shuffle(pool).slice(0, 16).map(async (m) => {
+  const today = new Date().toISOString().slice(0, 10);
+  const famous = await famousIds();
+
+  // kandidat -? rilisan terbaru yang terkenal (minimal 300 vote), 4 halaman teratas
+  const [recentPool, popularPool] = await Promise.all([
+    getPool(country, lang, {
+      noAnimation: true,
+      sort: 'primary_release_date.desc',
+      minVotes: 200,
+      firstPages: true,
+      pages: 4,
+    }),
+    getPool(country, lang, { noAnimation: true, sort: 'vote_count.desc' }),
+  ]);
+  const pool = [...new Map([...recentPool, ...popularPool].map((m) => [m.id, m])).values()];
+  const candidates = [...new Map([
+    ...shuffle(recentPool).slice(0, 8),
+    ...shuffle(popularPool).slice(0, 8),
+  ].map((m) => [m.id, m])).values()];
+
+  // filmografi tiap aktor diambil sekali aja
+  const cache = new Map();
+  const filmsOf = (id) => {
+    if (!cache.has(id)) {
+      cache.set(id, tmdb(`/person/${id}/movie_credits?language=en-US`).then((r) => r.cast || []).catch(() => []));
+    }
+    return cache.get(id);
+  };
+
+  // F3 -> film ini adalah yang paling baru yang dibintangi kedua aktor
+  const isNewestShared = async (m, [a, b]) => {
+    const [castA, castB] = await Promise.all([filmsOf(a.id), filmsOf(b.id)]);
+    const bIds = new Set(castB.map((x) => x.id));
+    const shared = castA.filter(
+      (x) => bIds.has(x.id) && x.release_date && x.release_date <= today && !isAnimation(x)
+    );
+    if (!shared.length) return false;
+    return [...shared].sort((x, y) => y.release_date.localeCompare(x.release_date))[0].id === m.id;
+  };
+
+  const results = await Promise.all(
+    candidates.map(async (m) => {
       try {
         const credits = await tmdb(`/movie/${m.id}/credits?language=${tmdbLang(lang)}`);
-        const stars = credits.cast.slice(0, 4).filter((a) => a.profile_path).slice(0, 2);
-        if (stars.length < 2) return null;
-        const actors = stars.map((a) => ({ name: a.name, photo: IMG + 'w185' + a.profile_path }));
-        return makeRound(m, pool, { kind: 'link', actors }, tl);
+        const cast = Array.isArray(credits?.cast) ? credits.cast : [];
+        const found = [];
+
+        // F1 -> dua pemeran teratas yang punya foto
+        const s1 = cast.slice(0, 4).filter((a) => a.profile_path).slice(0, 2);
+        if (s1.length === 2) found.push({ tier: 1, stars: s1 });
+
+        // F2 & F3 -> dua aktor dari daftar terkenal
+        const s2 = cast.slice(0, 8).filter((a) => a.profile_path && famous.has(a.id)).slice(0, 2);
+        if (s2.length === 2) {
+          found.push({ tier: 2, stars: s2 });
+          if (await isNewestShared(m, s2)) found.push({ tier: 3, stars: s2 });
+        }
+
+        return found.map((r) => ({
+          id: m.id,
+          tier: r.tier,
+          round: makeRound(
+            m,
+            pool,
+            {
+              kind: 'link',
+              actors: r.stars.map((a) => ({ name: a.name, photo: IMG + 'w185' + a.profile_path })),
+            },
+            tl
+          ),
+        }));
       } catch {
-        return null;
+        return [];
       }
     })
   );
-  return rounds.filter(Boolean).slice(0, LINK_ROUNDS);
+
+  // satu film satu soal, pakai hasil filter paling ketat
+  const byFilm = new Map();
+  results.flat().forEach((r) => {
+    const prev = byFilm.get(r.id);
+    if (!prev || r.tier > prev.tier) byFilm.set(r.id, r);
+  });
+  return shuffle([...byFilm.values()]).map((r) => r.round).slice(0, LINK_ROUNDS);
+
 }
 
 // poster pixel -> semua item dalam satu set
