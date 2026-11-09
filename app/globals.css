@@ -36,3 +36,25 @@ body::after {
   .focus-in { animation: none; }
   * { transition-duration: 0.01ms !important; }
 }
+
+/* animasi poster & foto di cover */
+@keyframes cover-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes cover-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+.cover-float { animation: cover-float 5s ease-in-out infinite; }
+.cover-in { animation: cover-in 0.6s ease-out backwards; }
+@media (prefers-reduced-motion: reduce) {
+  .cover-float, .cover-in { animation: none; }
+}
+
+/* backdrop halaman gelap dan blur saat modal aktif */
+.modal-open main {
+  filter: blur(6px) brightness(0.55);
+  transition: filter 0.2s ease;
+}
+

@@ -102,7 +102,7 @@ export default function VowelGame({ t, lang, level = 'easy', onExit }) {
   }
   if (phase === 'end') {
     return (
-      <Result t={t} lang={lang} title={`${t.modes.vowel.name} · ${t.modes.vowel.levels[level]}`} score={score} log={log} total={rounds.length}
+      <Result t={t} lang={lang} title={t.modes.vowel.name} score={score} log={log} total={rounds.length}
         correct={log.filter(Boolean).length} onAgain={load} onMenu={onExit} />
     );
   }
@@ -110,44 +110,47 @@ export default function VowelGame({ t, lang, level = 'easy', onExit }) {
   const revealed = phase === 'reveal';
 
   return (
-    <section className="grid min-h-0 flex-1 content-start gap-6 lg:content-center">
-      <div className="flex min-h-[220px] flex-col items-center justify-center gap-4 rounded-md bg-film px-6 py-10 ring-1 ring-white/10 sm:min-h-[280px]">
-        <p className="text-center font-serif text-4xl italic leading-tight tracking-wide sm:text-6xl">{round.masked}</p>
+    <section className="mx-auto grid w-full max-w-5xl flex-1 content-center gap-5 py-2 lg:grid-cols-[1.2fr_1fr] lg:items-center lg:gap-12">
+      <div className="flex min-h-[150px] flex-col items-center justify-center gap-3 rounded-2xl bg-film px-5 py-8 ring-1 ring-white/10 sm:min-h-[220px] sm:px-8">
+        <p className="break-words text-center font-serif text-2xl italic leading-tight tracking-wide sm:text-4xl lg:text-5xl">
+          {round.masked}
+        </p>
         {revealed && (
-          <p className="text-center text-lg text-cream/70">
+          <p className="text-center text-sm text-cream/70 sm:text-lg">
             {round.answer} <span className="text-cream/50">{round.year}</span>
           </p>
         )}
       </div>
 
-      <div className="flex flex-col gap-3">
-        <p className="font-serif text-2xl italic leading-tight">{t.modes.vowel.prompt}</p>
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-cream/70">{t.sceneOf(i + 1, rounds.length)} · {t.modes.vowel.levels[level]}</span>
-          <span className="text-lg font-semibold tabular-nums">{score}</span>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between text-xs text-cream/60 sm:text-sm">
+          <span>{t.sceneOf(i + 1, rounds.length)} · {t.modes.vowel.levels[level]}</span>
+          <span className="text-base font-semibold tabular-nums text-cream sm:text-lg">{score} {t.pts}</span>
         </div>
-        <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+        <div className="h-1 overflow-hidden rounded-full bg-white/10 sm:h-1.5">
           <div className="h-full rounded-full bg-gradient-to-r from-pink to-volt" style={{ width: `${(left / TOTAL) * 100}%` }} />
         </div>
 
+        <p className="font-serif text-xl italic leading-snug sm:text-2xl">{t.modes.vowel.prompt}</p>
+
         {!revealed && (
-          <form onSubmit={submit}>
+          <form onSubmit={submit} className="flex flex-col gap-2">
             <input
               key={i}
               autoFocus
               value={input}
               onChange={(e) => { setInput(e.target.value); setMsg(null); }}
               placeholder={t.modes.vowel.placeholder}
-              className="min-h-12 w-full rounded-xl border border-white/20 bg-white/5 px-5 outline-none placeholder:text-cream/40 focus:border-pink"
+              className="min-h-12 w-full rounded-xl border border-white/20 bg-white/5 px-4 outline-none placeholder:text-cream/40 focus:border-pink sm:px-5"
             />
-            <p className={`mt-1 h-5 px-2 text-sm ${msg?.ok ? 'text-ok' : 'text-bad'}`}>{msg?.text}</p>
+            <p className={`h-5 text-sm ${msg?.ok ? 'text-ok' : 'text-bad'}`}>{msg?.text}</p>
           </form>
         )}
 
-        <div className="flex min-h-12 items-center justify-between gap-3">
+        <div className="flex min-h-12 flex-wrap items-center justify-between gap-3">
           {revealed ? (
             <>
-              <p className="font-semibold">
+              <p className="text-sm font-semibold sm:text-base">
                 {gain > 0 ? <span className="text-ok">+{gain} {t.pts}</span> : <span className="text-bad">{t.timeout}</span>}
               </p>
               <button onClick={next} className={btn}>{i + 1 >= rounds.length ? t.seeResult : t.next}</button>

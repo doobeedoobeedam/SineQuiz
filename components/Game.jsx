@@ -193,21 +193,23 @@ export default function Game() {
 
   return (
     <section className="grid min-h-0 flex-1 content-start gap-4 lg:grid-cols-[1.45fr_1fr] lg:content-center lg:items-center lg:gap-8">
-      <Frame>
-        <img
-          src={round.image}
-          alt="Scene dari sebuah film yang harus ditebak"
-          className="h-full w-full object-cover transition-[filter] duration-200 ease-linear"
-          style={{ filter: `blur(${blur}px)`, transform: blur ? 'scale(1.1)' : 'scale(1)' }}
-        />
-        {revealed && (
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-film to-transparent p-4 pt-12">
-            <p className="font-serif text-2xl italic leading-tight sm:text-3xl">
-              {round.answer} <span className="text-cream/60">{round.year}</span>
-            </p>
-          </div>
-        )}
-      </Frame>
+      <div className="mx-auto w-full max-w-[300px] sm:max-w-[420px] lg:max-w-none">
+        <Frame>
+          <img
+            src={round.image}
+            alt="Scene dari sebuah film yang harus ditebak"
+            className="h-full w-full object-cover transition-[filter] duration-200 ease-linear"
+            style={{ filter: `blur(${blur}px)`, transform: blur ? 'scale(1.1)' : 'scale(1)' }}
+          />
+          {revealed && (
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-film to-transparent p-4 pt-12">
+              <p className="font-serif text-2xl italic leading-tight sm:text-3xl">
+                {round.answer} <span className="text-cream/60">{round.year}</span>
+              </p>
+            </div>
+          )}
+        </Frame>
+      </div>
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between text-sm">
@@ -222,7 +224,7 @@ export default function Game() {
           <div className="h-full rounded-full bg-gradient-to-r from-pink to-volt" style={{ width: `${(left / TOTAL) * 100}%` }} />
         </div>
 
-        <div className="grid gap-2.5">
+        <div className="grid gap-2 sm:gap-2.5">
           {round.options.map((o, k) => {
             const isAnswer = o === round.answer;
             const isPicked = o === picked;
@@ -243,7 +245,7 @@ export default function Game() {
                 <span className="grid w-11 shrink-0 place-items-center border-r-2 border-dashed border-white/20 font-serif text-xl italic">
                   {'ABCD'[k]}
                 </span>
-                <span className="px-4 py-3 font-medium leading-snug">{o}</span>
+                <span className="px-3 py-2 text-sm font-medium leading-snug sm:px-4 sm:py-3 sm:text-base">{o}</span>
               </button>
             );
           })}
