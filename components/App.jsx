@@ -6,15 +6,17 @@ import Menu from './Menu';
 import QuizGame from './QuizGame';
 import CastGame from './CastGame';
 import FilmoGame from './FilmoGame';
+import ActorGame from './ActorGame';
+import VowelGame from './VowelGame';
 import { pill } from '../lib/ui';
 
 const CREDIT = { name: 'Kusuma Wecitra', url: 'https://wecitra.github.io' };
 
 export default function App() {
-  const [lang, setLang] = useState('id'); // 'id' | 'en' (hanya di memori)
+  const [lang, setLang] = useState('en');
   const [screen, setScreen] = useState('menu'); // menu | play
   const [config, setConfig] = useState(null); // { mode, country }
-  const [toast, setToast] = useState(null); // notifikasi lencana yang baru didapat
+  const [toast, setToast] = useState(null); // notifikasi badge yang baru didapat
   const t = TEXT[lang];
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export default function App() {
         <nav className="flex flex-wrap items-center gap-2">
           {screen !== 'menu' && <button onClick={toMenu} className={`${pill} border-white/20 hover:border-pink`}>{t.menu}</button>}
           <div className="flex overflow-hidden rounded-lg border border-white/20" role="group" aria-label="Language">
-            {['id', 'en'].map((l) => (
+            {['en', 'id'].map((l) => (
               <button key={l} onClick={() => setLang(l)} aria-pressed={lang === l}
                 className={`min-h-10 min-w-[3.25rem] px-4 text-sm font-semibold uppercase ${lang === l ? 'bg-cream text-ink' : 'hover:text-pink'}`}>{l}</button>
             ))}
@@ -65,7 +67,12 @@ export default function App() {
       {screen === 'play' && ['scene', 'link', 'mcu', 'nolan'].includes(config.mode) && (
         <QuizGame t={t} lang={lang} mode={config.mode} country={config.country} onWin={handleWin} onExit={toMenu} />
       )}
-
+      {screen === 'play' && config.mode === 'actorguess' && (
+        <ActorGame t={t} lang={lang} onExit={toMenu} />
+      )}
+      {screen === 'play' && config.mode === 'vowel' && (
+        <VowelGame t={t} lang={lang} level={config.level} onExit={toMenu} />
+      )}
       <footer className="flex flex-col sm:flex-row flex-wrap items-center justify-between gap-x-4 gap-y-1 pt-3 text-xs text-cream/40">
         <span>{t.footer}</span>
         <span>
