@@ -243,6 +243,7 @@ export async function GET(req) {
     const hero = mode === 'mcu' || mode === 'nolan' ? await heroFor(mode).catch(() => null) : null;
     return Response.json({ rounds, hero });
   } catch (e) {
+    console.error('[quiz]', mode, e);
     return Response.json({ error: e.message }, { status: 502 });
   }
 }
