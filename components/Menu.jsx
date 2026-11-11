@@ -286,21 +286,21 @@ export default function Menu({ t, lang, onStart }) {
         </div>
       </Section>
 
-      <Section n="4" flip art={filmoReady ? <FilmoPhotoArt photos={cover.filmoPhotos} /> : <FilmoArt />} title={t.modes.filmo.name} desc={t.modes.filmo.desc} play={t.play} onPlay={() => onStart({ mode: 'filmo', country: 'ALL' })}>
-        <p className="text-sm text-pink">{t.modes.filmo.hint}</p>
-      </Section>
-
-      <Section n="5" art={linkReady ? <LinkPhotoArt photos={cover.linkPhotos} /> : <LinkArt />} title={t.modes.link.name} desc={t.modes.link.desc} play={t.play} onPlay={play('link')}>
+      <Section n="4" flip art={linkReady ? <LinkPhotoArt photos={cover.linkPhotos} /> : <LinkArt />} title={t.modes.link.name} desc={t.modes.link.desc} play={t.play} onPlay={play('link')}>
         <p className="text-sm text-pink">{t.modes.link.hint}</p>
         {picker('link')}
       </Section>
 
-      <Section n="6" flip art={castReady ? <CastPhotoArt photos={cover.castPhotos} /> : <CastArt />} title={t.modes.cast.name} desc={t.modes.cast.desc} play={t.play} onPlay={play('cast')}>
-        {picker('cast')}
+      <Section n="5" art={trioReady ? <ActorPhotoArt posters={cover.trio} /> : <ActorArt />} title={t.modes.actorGuess.name} desc={t.modes.actorGuess.desc} play={t.play} onPlay={() => onStart({ mode: 'actorguess', country: 'ALL' })}>
+        <p className="text-sm text-pink">{t.modes.actorGuess.hint}</p>
       </Section>
 
-      <Section n="7" art={trioReady ? <ActorPhotoArt posters={cover.trio} /> : <ActorArt />} title={t.modes.actorGuess.name} desc={t.modes.actorGuess.desc} play={t.play} onPlay={() => onStart({ mode: 'actorguess', country: 'ALL' })}>
-        <p className="text-sm text-pink">{t.modes.actorGuess.hint}</p>
+      <Section n="6" flip art={filmoReady ? <FilmoPhotoArt photos={cover.filmoPhotos} /> : <FilmoArt />} title={t.modes.filmo.name} desc={t.modes.filmo.desc} play={t.play} onPlay={() => onStart({ mode: 'filmo', country: 'ALL' })}>
+        <p className="text-sm text-pink">{t.modes.filmo.hint}</p>
+      </Section>
+
+      <Section n="7" art={castReady ? <CastPhotoArt photos={cover.castPhotos} /> : <CastArt />} title={t.modes.cast.name} desc={t.modes.cast.desc} play={t.play} onPlay={play('cast')}>
+        {picker('cast')}
       </Section>
     </div>
   );
