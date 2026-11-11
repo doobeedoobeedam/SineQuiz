@@ -41,7 +41,8 @@ async function findActor(name) {
 
 // nama acak dari CURATED_ACTORS, dicari satu-satu
 async function curatedSample() {
-  const names = shuffle(CURATED_ACTORS).slice(0, SESSION_PICK);
+  const source = Array.isArray(CURATED_ACTORS) ? CURATED_ACTORS : [];
+  const names = shuffle(source).slice(0, SESSION_PICK);
   const out = [];
   for (let i = 0; i < names.length; i += BATCH) {
     const batch = await Promise.all(names.slice(i, i + BATCH).map(findActor));
