@@ -3,7 +3,7 @@ import { IMG, displayTitle, shuffle, tmdb } from '../../../lib/tmdb';
 
 export const dynamic = 'force-dynamic';
 
-const POP_MIN = 25;
+const POP_MIN = 27;
 const isHollywood = (p) => (p.known_for || []).some((k) => k.media_type === 'movie' && k.original_language === 'en');
 const knownForBlockbuster = (p) =>
   (p.known_for || []).some((k) => k.media_type === 'movie' && k.original_language === 'en' && (k.vote_count || 0) >= 1000);

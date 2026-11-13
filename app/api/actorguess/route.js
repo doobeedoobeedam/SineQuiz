@@ -18,10 +18,10 @@ function shuffle(list) {
 
 export const dynamic = 'force-dynamic';
 
-const SESSION_PICK = 3; // nama curated per sesi
+const SESSION_PICK = 4; // nama curated per sesi
 const POP_FILMS = 50; // film populer yang dipakai sebagai sumber aktor
 const POP_FILM_VOTES = 300; // batas minimal vote film populer
-const ROUNDS = 10; // total soal per sesi
+const ROUNDS = 15; // total soal per sesi
 const RECENT_YEARS = 20;
 const MIN_ROUNDS = 3;
 const POP_MIN = 10; // cadangan -> skor popularitas minimal

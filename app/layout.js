@@ -5,7 +5,7 @@ const sans = Bricolage_Grotesque({ subsets: ['latin'], variable: '--f-sans' });
 const serif = Instrument_Serif({ subsets: ['latin'], weight: '400', style: ['normal', 'italic'], variable: '--f-serif' });
 
 export const metadata = {
-  title: 'SineQuiz - tebak film dari satu scene',
+  title: 'SineQuiz',
   description: 'Quiz tebak judul film dari cuplikan scene. Data dari TMDB.',
 };
 

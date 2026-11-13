@@ -6,8 +6,8 @@ export const dynamic = 'force-dynamic';
 
 const MARVEL = '420|505'; // Marvel Studios | Marvel Entertainment
 const MARVEL_SHARE = 0.2;  // Guess the Scene -> proporsi film Marvel
-const SCENE_ROUNDS = 10;
-const LINK_ROUNDS = 10;
+const SCENE_ROUNDS = 15;
+const LINK_ROUNDS = 15;
 const isAnimation = (m) => (m.genre_ids || []).includes(16);
 
 const isGroot = (t) => /groot/i.test(t);

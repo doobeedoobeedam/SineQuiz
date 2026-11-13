@@ -24,7 +24,7 @@ export async function GET(req) {
     const rounds = shuffle(pool.map((m) => ({ m, t: displayTitle(m, 'en') })).filter(({ t }) => onlyLettersAndSpaces(t) && !hasRomanNumeral(t)))
       .map(({ m, t }) => ({ id: m.id, answer: t, year: (m.release_date || '').slice(0, 4), masked: mask(t, level) }))
       .filter((r) => (r.masked.match(/[A-Z]/g) || []).length >= 3)
-      .slice(0, 10);
+      .slice(0, 15);
     if (rounds.length < 4) return Response.json({ error: 'Judul tidak cukup, coba lagi' }, { status: 404 });
     return Response.json({ rounds });
   } catch (e) {
